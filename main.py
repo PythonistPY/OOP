@@ -1,59 +1,84 @@
-class Task:
-    def __init__(self, description, due_date):
-        self.description = description
-        self.due_date = due_date
-        self.completed = False
+class User:
+    def __init__(self, user_id, name):
+        self.__user_id = user_id
+        self.__name = name
+        self.__access_level = 'user'  # Уровень доступа по умолчанию для обычных сотрудников
 
-    def mark_as_completed(self):
-        self.completed = True
+    # Геттер для ID
+    @property
+    def user_id(self):
+        return self.__user_id
 
-    def __str__(self):
-        status = "Completed" if self.completed else "Not completed"
-        return f"Task: {self.description}, Due date: {self.due_date}, Status: {status}"
+    # Геттер для имени
+    @property
+    def name(self):
+        return self.__name
 
+    # Геттер для уровня доступа
+    @property
+    def access_level(self):
+        return self.__access_level
 
-class TaskManager:
-    def __init__(self):
-        self.tasks = []
-
-    def add_task(self, description, due_date):
-        task = Task(description, due_date)
-        self.tasks.append(task)
-
-    def mark_task_as_completed(self, description):
-        for task in self.tasks:
-            if task.description == description and not task.completed:
-                task.mark_as_completed()
-                return True
-        return False
-
-    def get_current_tasks(self):
-        return [task for task in self.tasks if not task.completed]
+    # Устанавливаем имя
+    @name.setter
+    def name(self, value):
+        if isinstance(value, str):
+            self.__name = value
+        else:
+            raise ValueError("Name must be a string.")
 
     def __str__(self):
-        return "\n".join(str(task) for task in self.tasks)
+        return f"User(ID: {self.__user_id}, Name: {self.__name}, Access Level: {self.__access_level})"
+
+
+class Admin(User):
+    def __init__(self, user_id, name):
+        super().__init__(user_id, name)
+        self.__access_level = 'admin'  # Уровень доступа для администраторов
+        self.__user_list = []
+
+    # Метод для добавления пользователя
+    def add_user(self, user):
+        if isinstance(user, User) and user not in self.__user_list:
+            self.__user_list.append(user)
+        else:
+            raise ValueError("Invalid user or user already exists.")
+
+    # Метод для удаления пользователя
+    def remove_user(self, user):
+        if user in self.__user_list:
+            self.__user_list.remove(user)
+        else:
+            raise ValueError("User not found.")
+
+    # Геттер для списка пользователей
+    @property
+    def user_list(self):
+        return self.__user_list
+
+    def __str__(self):
+        return f"Admin(ID: {self.user_id}, Name: {self.name}, Access Level: {self.access_level}, Managed Users: {len(self.__user_list)})"
 
 
 # Пример использования
 if __name__ == "__main__":
-    manager = TaskManager()
+    # Создаем пользователей
+    user1 = User(user_id=1, name="Alice")
+    user2 = User(user_id=2, name="Bob")
 
-    # Добавление задач
-    manager.add_task("Finish homework", "2024-08-21")
-    manager.add_task("Buy groceries", "2024-08-22")
+    # Создаем администратора
+    admin = Admin(user_id=100, name="Charlie")
 
-    # Вывод текущих задач
-    print("Current tasks:")
-    for task in manager.get_current_tasks():
-        print(task)
+    # Добавляем пользователей через администратора
+    admin.add_user(user1)
+    admin.add_user(user2)
 
-    # Отметка задачи как выполненной
-    manager.mark_task_as_completed("Finish homework")
+    print(admin)  # Показывает информацию об администраторе и управляемых пользователях
 
-    # Вывод задач после выполнения
-    print("\nTasks after marking 'Finish homework' as completed:")
-    for task in manager.get_current_tasks():
-        print(task)
+    # Удаляем одного пользователя
+    admin.remove_user(user1)
+
+    print(admin)  # Обновленная информация об администраторе
 
 
 
